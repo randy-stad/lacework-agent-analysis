@@ -2,6 +2,7 @@ package us.stad;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.time.LocalDateTime;
@@ -45,8 +46,25 @@ public class LaceworkAgentAnalysis {
             System.exit(0);
         }
 
+        if (line.hasOption("s") && !line.hasOption("o")) {
+            new HelpFormatter().printHelp("lacework-agent-analysis", options);
+            System.exit(0);
+        }
+
         if (line.hasOption("s")) {
             processDirectory(line.getOptionValue("s"));
+        }
+
+        if (line.hasOption("o")) {
+            try (FileWriter writer = new FileWriter(line.getOptionValue("o"))) {
+                if (line.hasOption("r")) {
+                    sheet.dumpReversedCSV(writer);
+                } else {
+                    sheet.dumpCSV(writer);
+                }
+            } catch (IOException e) {
+                LOG.error("write failed", e);
+            }
         }
 
     }
@@ -66,14 +84,12 @@ public class LaceworkAgentAnalysis {
             LOG.info("processing " + files[i].getName());
             processInputFile(files[i]);
         }
-        sheet.dumpCSV();
     }
-
 
     private static void processInputFile(File file) {
 
         LocalDateTime dateTime = parseDateTimeFromFilename(file.getName());
-    
+
         try (Reader in = new FileReader(file)) {
             Iterable<CSVRecord> records = buildFormat().parse(in);
             for (CSVRecord record : records) {
@@ -96,7 +112,8 @@ public class LaceworkAgentAnalysis {
         }
         return null;
     }
-    //Jul 12 2022_11_50 (MDT)
+
+    // Jul 12 2022_11_50 (MDT)
     public static LocalDateTime parseDateTimeFromFilename(String filename) {
         String value = filename.replace("agents_agent_monitor_", "");
         value = value.replace(".csv", "");
@@ -114,7 +131,8 @@ public class LaceworkAgentAnalysis {
 
         Options options = new Options();
         options.addOption("o", "output", true, "output file (required if source specified)");
-        options.addOption("s", "source", true, "source directory of CSV files to parse downloaded from Lacework");
+        options.addOption("s", "source", true, "source directory of agent resource CSV files to parse");
+        options.addOption("r", "reverse", false, "reverse rows and columns in the resulting CSV file");
         options.addOption("h", "help", false, "print this message");
 
         return options;
