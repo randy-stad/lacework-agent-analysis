@@ -1,5 +1,8 @@
 package us.stad;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -35,6 +38,10 @@ public class AppTest extends TestCase {
      * Test filename date parsing.
      */
     public void testFilenameDateParsing() {
-        assertNotNull(LaceworkAgentAnalysis.parseDateTimeFromFilename("agents_agent_monitor_Jul 12 2022_11_50 (MDT).csv"));
+        LocalDateTime dateTime = LaceworkAgentAnalysis.parseDateTimeFromFilename("agents_agent_monitor_Jul 12 2022_11_50 (MDT).csv");
+        assertNotNull(dateTime);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
+        String stringDateTime = dateTime.format(dateTimeFormatter);
+        assertEquals("07-12-2022 11:50:00", stringDateTime);
     }
 }
