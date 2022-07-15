@@ -1,7 +1,6 @@
 package us.stad.entity;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +41,7 @@ public class DataSheet {
 
     public void dumpCSV(Writer writer) throws IOException {
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
 
         // write the header row first (which is metric)
 
@@ -75,7 +74,7 @@ public class DataSheet {
 
     public void dumpReversedCSV(Writer writer) throws IOException {
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
 
         // write the header row first (which is time)
 
