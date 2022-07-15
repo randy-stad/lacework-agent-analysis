@@ -52,7 +52,7 @@ public class LaceworkAgentAnalysis {
         }
 
         if (line.hasOption("s")) {
-            processDirectory(line.getOptionValue("s"));
+            processDirectory(line.getOptionValue("s"), line.hasOption("c"), line.hasOption("m"));
         }
 
         if (line.hasOption("o")) {
@@ -71,7 +71,7 @@ public class LaceworkAgentAnalysis {
 
     private static DataSheet sheet = new DataSheet();
 
-    private static void processDirectory(String directory) {
+    private static void processDirectory(String directory, boolean clusterCounts, boolean modeCounts) {
         File dir = new File(directory);
         if (!dir.isDirectory()) {
             LOG.error(directory + ": is not a directory");
@@ -82,11 +82,11 @@ public class LaceworkAgentAnalysis {
         });
         for (int i = 0; i < files.length; i++) {
             LOG.info("processing " + files[i].getName());
-            processInputFile(files[i]);
+            processInputFile(files[i], clusterCounts, modeCounts);
         }
     }
 
-    private static void processInputFile(File file) {
+    private static void processInputFile(File file, boolean clusterCounts, boolean modeCounts) {
 
         LocalDateTime dateTime = parseDateTimeFromFilename(file.getName());
 
@@ -95,8 +95,10 @@ public class LaceworkAgentAnalysis {
             for (CSVRecord record : records) {
                 String status = record.get("Agent Status");
                 String name = record.get("Name");
+                String mode = record.get("Agent Mode");
                 if (status.equalsIgnoreCase("active")) {
-                    sheet.incrementAndGet(dateTime, nameToCluster(name));
+                    if (clusterCounts) sheet.incrementAndGet(dateTime, nameToCluster(name));
+                    if (modeCounts) sheet.incrementAndGet(dateTime, mode);
                 }
             }
         } catch (IOException e) {
@@ -130,6 +132,8 @@ public class LaceworkAgentAnalysis {
     private static Options buildOptions() {
 
         Options options = new Options();
+        options.addOption("m", "mode", false, "calculate agent mode metrics");
+        options.addOption("c", "cluster", false, "calculate cluster metrics");
         options.addOption("o", "output", true, "output file (required if source specified)");
         options.addOption("s", "source", true, "source directory of agent resource CSV files to parse");
         options.addOption("r", "reverse", false, "reverse rows and columns in the resulting CSV file");
